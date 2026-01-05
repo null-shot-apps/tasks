@@ -22,12 +22,13 @@ export default function TaskManager() {
 
   const addTask = () => {
     if (newTask.trim()) {
-      setTasks([...tasks, {
+      const updatedTasks = [...tasks, {
         id: Date.now().toString(),
         text: newTask,
         completed: false,
         priority: 'medium'
-      }]);
+      }];
+      setTasks(sortTasksByPriority(updatedTasks));
       setNewTask('');
     }
   };
@@ -43,9 +44,15 @@ export default function TaskManager() {
   };
 
   const changePriority = (id: string, priority: Priority) => {
-    setTasks(tasks.map(task => 
+    const updatedTasks = tasks.map(task => 
       task.id === id ? { ...task, priority } : task
-    ));
+    );
+    setTasks(sortTasksByPriority(updatedTasks));
+  };
+
+  const sortTasksByPriority = (tasksToSort: Task[]) => {
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    return [...tasksToSort].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
   };
 
   const startTimer = () => {
@@ -225,6 +232,8 @@ export default function TaskManager() {
     </div>
   );
 }
+
+
 
 
 
