@@ -23,11 +23,11 @@ export default function TaskManager() {
 
   const addTask = () => {
     if (newTask.trim()) {
-      const updatedTasks = [...tasks, {
+      const updatedTasks: Task[] = [...tasks, {
         id: Date.now().toString(),
         text: newTask,
         completed: false,
-        priority: 'medium',
+        priority: 'medium' as Priority,
         notes: ''
       }];
       setTasks(sortTasksByPriority(updatedTasks));
@@ -251,6 +251,7 @@ export default function TaskManager() {
     </div>
   );
 }
+
 
 
 
