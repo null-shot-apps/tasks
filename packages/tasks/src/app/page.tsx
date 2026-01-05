@@ -9,6 +9,7 @@ interface Task {
   text: string;
   completed: boolean;
   priority: Priority;
+  notes: string;
 }
 
 export default function TaskManager() {
@@ -26,7 +27,8 @@ export default function TaskManager() {
         id: Date.now().toString(),
         text: newTask,
         completed: false,
-        priority: 'medium'
+        priority: 'medium',
+        notes: ''
       }];
       setTasks(sortTasksByPriority(updatedTasks));
       setNewTask('');
@@ -48,6 +50,12 @@ export default function TaskManager() {
       task.id === id ? { ...task, priority } : task
     );
     setTasks(sortTasksByPriority(updatedTasks));
+  };
+
+  const updateNotes = (id: string, notes: string) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, notes } : task
+    ));
   };
 
   const sortTasksByPriority = (tasksToSort: Task[]) => {
@@ -193,32 +201,43 @@ export default function TaskManager() {
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-4 p-4 border-t border-black first:border-t-0"
+                className="border-t border-black first:border-t-0"
               >
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => toggleTask(task.id)}
-                  className="w-6 h-6 border-2 border-black cursor-pointer accent-black"
-                />
-                <span className={`flex-1 text-lg ${task.completed ? 'line-through text-gray-400' : 'text-black'}`}>
-                  {task.text}
-                </span>
-                <select
-                  value={task.priority}
-                  onChange={(e) => changePriority(task.id, e.target.value as Priority)}
-                  className={`px-3 py-1 border border-black text-sm font-medium ${getPriorityColor(task.priority)} focus:outline-none focus:ring-2 focus:ring-black`}
-                >
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  className="px-4 py-1 text-sm border border-black text-black hover:bg-black hover:text-white transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-4 p-4">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => toggleTask(task.id)}
+                    className="w-6 h-6 border-2 border-black cursor-pointer accent-black"
+                  />
+                  <span className={`flex-1 text-lg ${task.completed ? 'line-through text-gray-400' : 'text-black'}`}>
+                    {task.text}
+                  </span>
+                  <select
+                    value={task.priority}
+                    onChange={(e) => changePriority(task.id, e.target.value as Priority)}
+                    className={`px-3 py-1 border border-black text-sm font-medium ${getPriorityColor(task.priority)} focus:outline-none focus:ring-2 focus:ring-black`}
+                  >
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="px-4 py-1 text-sm border border-black text-black hover:bg-black hover:text-white transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="px-4 pb-4 pl-14">
+                  <textarea
+                    value={task.notes}
+                    onChange={(e) => updateNotes(task.id, e.target.value)}
+                    placeholder="Add notes (phone number, details, etc.)"
+                    className="w-full px-3 py-2 text-sm text-gray-600 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black resize-none"
+                    rows={2}
+                  />
+                </div>
               </div>
             ))}
             {tasks.length === 0 && (
@@ -232,6 +251,10 @@ export default function TaskManager() {
     </div>
   );
 }
+
+
+
+
 
 
 
