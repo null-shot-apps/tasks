@@ -1,84 +1,203 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-const slogans = [
-  "Turn chats into apps",
-  "Prompt. Ship. Repeat.",
-  "Build anything from a chat",
-  "Ideas → Apps, instantly",
-  "From zero to MVP in minutes",
-  "Your cofounder in the command line",
-  "Draft, iterate, deploy",
-  "Ship faster than you can type",
-  "Design in text, deliver in code",
-  "Dream it. Prompt it. Run it.",
-  "Chat-native app building",
-  "From prompt to product",
-  "One prompt, infinite apps",
-  "Stop scaffolding. Start shipping.",
-  "Prototype at the speed of thought",
-  "Make conversations executable"
-];
+type Priority = 'high' | 'medium' | 'low';
 
-export default function Landing() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+  priority: Priority;
+}
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % slogans.length);
-        setIsVisible(true);
-      }, 400);
-    }, 2800);
+export default function TaskManager() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState('');
+  const [timerMinutes, setTimerMinutes] = useState(25);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
-    return () => clearInterval(interval);
-  }, []);
+  const addTask = () => {
+    if (newTask.trim()) {
+      setTasks([...tasks, {
+        id: Date.now().toString(),
+        text: newTask,
+        completed: false,
+        priority: 'medium'
+      }]);
+      setNewTask('');
+    }
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const changePriority = (id: string, priority: Priority) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, priority } : task
+    ));
+  };
+
+  const startTimer = () => {
+    if (!isTimerRunning) {
+      setIsTimerRunning(true);
+      const interval = setInterval(() => {
+        setTimerSeconds(prev => {
+          if (prev === 0) {
+            setTimerMinutes(prevMin => {
+              if (prevMin === 0) {
+                stopTimer();
+                return 0;
+              }
+              return prevMin - 1;
+            });
+            return 59;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      setTimerInterval(interval);
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+    setIsTimerRunning(false);
+  };
+
+  const resetTimer = () => {
+    stopTimer();
+    setTimerMinutes(25);
+    setTimerSeconds(0);
+  };
+
+  const getPriorityColor = (priority: Priority) => {
+    switch (priority) {
+      case 'high': return 'text-black';
+      case 'medium': return 'text-gray-500';
+      case 'low': return 'text-gray-300';
+    }
+  };
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-black text-white">
-      {/* Enhanced animated aurora background layers */}
-      <div className="absolute inset-0 bg-aurora-layer-1" />
-      <div className="absolute inset-0 bg-aurora-layer-2" />
-      <div className="absolute inset-0 bg-aurora-layer-3" />
-      
-      {/* Floating particles overlay */}
-      <div className="absolute inset-0 bg-particles" />
-      
-      {/* Main content - centered */}
-      <main className="relative z-10 h-full flex flex-col items-center justify-center px-6">
-        <h1 className="text-center text-[clamp(28px,6vw,64px)] font-medium tracking-tight mb-4">
-          Turn Chats into Apps
-        </h1>
-        
-        {/* Rotating slogans */}
-        <div className="mt-4 h-8 md:h-10 overflow-hidden flex items-center justify-center">
-          <span
-            className={`inline-block text-center text-[clamp(18px,3vw,32px)] font-light transition-all duration-[400ms] ease-in-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-            }`}
-          >
-            {slogans[currentIndex]}
-          </span>
+    <div className="min-h-screen bg-white p-8 md:p-16">
+      <div className="max-w-4xl mx-auto space-y-16">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-5xl font-bold tracking-tight">Today</h1>
+          <div className="h-px bg-black"></div>
         </div>
-      </main>
-      
-      {/* Start Prompting arrow pointing left - bottom left */}
-      <div className="absolute left-6 md:left-8 bottom-[5%] z-20 flex items-center gap-3 arrow-point-left">
-        <div className="flex items-center gap-2 text-white/80 font-medium text-sm md:text-base">
-          <svg 
-            className="w-5 h-5 md:w-6 md:h-6 animate-bounce-horizontal" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span>Start prompting</span>
+
+        {/* Timer Section */}
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold tracking-tight">Timer</h2>
+          <div className="border border-black p-8 space-y-6">
+            <div className="text-7xl font-light text-center tracking-tight">
+              {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
+            </div>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={startTimer}
+                disabled={isTimerRunning}
+                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Start
+              </button>
+              <button
+                onClick={stopTimer}
+                disabled={!isTimerRunning}
+                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Pause
+              </button>
+              <button
+                onClick={resetTimer}
+                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tasks Section */}
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
+          
+          {/* Add Task */}
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addTask()}
+              placeholder="Add a new task..."
+              className="flex-1 px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-black"
+            />
+            <button
+              onClick={addTask}
+              className="px-8 py-3 bg-black text-white hover:bg-gray-800 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+
+          {/* Task List */}
+          <div className="space-y-px">
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className="flex items-center gap-4 p-4 border-t border-black group"
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleTask(task.id)}
+                  className="w-6 h-6 border-2 border-black cursor-pointer"
+                />
+                <span className={`flex-1 text-lg ${task.completed ? 'line-through text-gray-400' : getPriorityColor(task.priority)}`}>
+                  {task.text}
+                </span>
+                <select
+                  value={task.priority}
+                  onChange={(e) => changePriority(task.id, e.target.value as Priority)}
+                  className="px-3 py-1 border border-black text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                >
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="px-4 py-1 text-sm border border-black hover:bg-black hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+            {tasks.length > 0 && <div className="h-px bg-black"></div>}
+          </div>
+
+          {tasks.length === 0 && (
+            <div className="text-center py-16 text-gray-400 text-lg">
+              No tasks yet. Add one to get started.
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
