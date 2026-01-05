@@ -85,9 +85,9 @@ export default function TaskManager() {
 
   const getPriorityColor = (priority: Priority) => {
     switch (priority) {
-      case 'high': return 'text-black';
-      case 'medium': return 'text-gray-500';
-      case 'low': return 'text-gray-300';
+      case 'high': return 'text-red-600';
+      case 'medium': return 'text-yellow-600';
+      case 'low': return 'text-green-600';
     }
   };
 
@@ -96,35 +96,35 @@ export default function TaskManager() {
       <div className="max-w-4xl mx-auto space-y-16">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-5xl font-bold tracking-tight">Today</h1>
+          <h1 className="text-5xl font-bold text-black tracking-tight">Tasks</h1>
           <div className="h-px bg-black"></div>
         </div>
 
         {/* Timer Section */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold tracking-tight">Timer</h2>
+          <h2 className="text-3xl font-bold text-black">Timer</h2>
           <div className="border border-black p-8 space-y-6">
-            <div className="text-7xl font-light text-center tracking-tight">
+            <div className="text-7xl font-light text-black text-center tabular-nums">
               {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
             </div>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={startTimer}
                 disabled={isTimerRunning}
-                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-8 py-3 border border-black text-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 Start
               </button>
               <button
                 onClick={stopTimer}
                 disabled={!isTimerRunning}
-                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-8 py-3 border border-black text-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 Pause
               </button>
               <button
                 onClick={resetTimer}
-                className="px-8 py-3 border border-black hover:bg-black hover:text-white transition-colors"
+                className="px-8 py-3 border border-black text-black hover:bg-black hover:text-white transition-colors"
               >
                 Reset
               </button>
@@ -132,19 +132,17 @@ export default function TaskManager() {
           </div>
         </div>
 
-        {/* Tasks Section */}
+        {/* Task Input */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
-          
-          {/* Add Task */}
+          <h2 className="text-3xl font-bold text-black">Add Task</h2>
           <div className="flex gap-4">
             <input
               type="text"
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addTask()}
-              placeholder="Add a new task..."
-              className="flex-1 px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-black"
+              placeholder="What needs to be done?"
+              className="flex-1 px-4 py-3 border border-black text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               onClick={addTask}
@@ -153,27 +151,30 @@ export default function TaskManager() {
               Add
             </button>
           </div>
+        </div>
 
-          {/* Task List */}
+        {/* Task List */}
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold text-black">Today</h2>
           <div className="space-y-px">
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-4 p-4 border-t border-black group"
+                className="flex items-center gap-4 p-4 border-t border-black first:border-t-0"
               >
                 <input
                   type="checkbox"
                   checked={task.completed}
                   onChange={() => toggleTask(task.id)}
-                  className="w-6 h-6 border-2 border-black cursor-pointer"
+                  className="w-6 h-6 border-2 border-black cursor-pointer accent-black"
                 />
-                <span className={`flex-1 text-lg ${task.completed ? 'line-through text-gray-400' : getPriorityColor(task.priority)}`}>
+                <span className={`flex-1 text-lg ${task.completed ? 'line-through text-gray-400' : 'text-black'}`}>
                   {task.text}
                 </span>
                 <select
                   value={task.priority}
                   onChange={(e) => changePriority(task.id, e.target.value as Priority)}
-                  className="px-3 py-1 border border-black text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className={`px-3 py-1 border border-black text-sm font-medium ${getPriorityColor(task.priority)} focus:outline-none focus:ring-2 focus:ring-black`}
                 >
                   <option value="high">High</option>
                   <option value="medium">Medium</option>
@@ -181,20 +182,18 @@ export default function TaskManager() {
                 </select>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="px-4 py-1 text-sm border border-black hover:bg-black hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                  className="px-4 py-1 text-sm border border-black text-black hover:bg-black hover:text-white transition-colors"
                 >
                   Delete
                 </button>
               </div>
             ))}
-            {tasks.length > 0 && <div className="h-px bg-black"></div>}
+            {tasks.length === 0 && (
+              <div className="text-center py-12 text-gray-400 text-lg">
+                No tasks yet. Add one above to get started.
+              </div>
+            )}
           </div>
-
-          {tasks.length === 0 && (
-            <div className="text-center py-16 text-gray-400 text-lg">
-              No tasks yet. Add one to get started.
-            </div>
-          )}
         </div>
       </div>
     </div>
