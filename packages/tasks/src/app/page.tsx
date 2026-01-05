@@ -18,6 +18,7 @@ export default function TaskManager() {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [timerInput, setTimerInput] = useState('25');
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -79,7 +80,15 @@ export default function TaskManager() {
 
   const resetTimer = () => {
     stopTimer();
-    setTimerMinutes(25);
+    const minutes = parseInt(timerInput) || 25;
+    setTimerMinutes(minutes);
+    setTimerSeconds(0);
+  };
+
+  const setCustomTime = () => {
+    const minutes = parseInt(timerInput) || 25;
+    stopTimer();
+    setTimerMinutes(minutes);
     setTimerSeconds(0);
   };
 
@@ -104,6 +113,23 @@ export default function TaskManager() {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold text-black">Timer</h2>
           <div className="border border-black p-8 space-y-6">
+            <div className="flex gap-4 justify-center items-center">
+              <input
+                type="number"
+                value={timerInput}
+                onChange={(e) => setTimerInput(e.target.value)}
+                disabled={isTimerRunning}
+                placeholder="Minutes"
+                className="w-24 px-4 py-2 border border-black text-black text-center focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-30 disabled:cursor-not-allowed"
+              />
+              <button
+                onClick={setCustomTime}
+                disabled={isTimerRunning}
+                className="px-6 py-2 border border-black text-black hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                Set
+              </button>
+            </div>
             <div className="text-7xl font-light text-black text-center tabular-nums">
               {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
             </div>
@@ -199,4 +225,7 @@ export default function TaskManager() {
     </div>
   );
 }
+
+
+
 
